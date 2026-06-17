@@ -1,6 +1,6 @@
 # My Nginx App — Kubernetes CI/CD Project
 
-> Forked from the interview task repository. This is a peronal solution
+> This is a peronal solution
 > demonstrating a full GitOps-based Kubernetes deployment pipeline with
 > semantic versioning, and automated releases.
 
