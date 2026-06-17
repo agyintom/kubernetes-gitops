@@ -1,0 +1,272 @@
+# =============================================================================
+# Local Kubernetes CI/CD Pipeline
+# -----------------------------------------------------------------------------
+# This pipeline automates the full lifecycle of building, versioning, and
+# deploying a containerised application to a self-hosted Kubernetes cluster.
+#
+# Flow:
+#   release → build → push → pre-pull → deploy → cleanup
+#
+# Trigger: any push to the main branch
+# Runner:  self-hosted (runs on k8s-master)
+# =============================================================================
+
+name: Local K8s CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+# Allow the pipeline to write back to the repository
+# Required for: committing updated image tags, pushing changelog, creating tags
+permissions:
+  contents: write
+
+# -----------------------------------------------------------------------------
+# Global environment variables shared across all jobs
+# -----------------------------------------------------------------------------
+env:
+  REGISTRY: 192.168.178.115:5000            # Private local Docker registry
+  IMAGE: mynginx                             # Image name in the registry
+  DEPLOYMENT: my-nginx                       # Kubernetes deployment name
+  CONTAINER: my-nginx                        # Container name inside the deployment
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # Suppress Node.js 20 deprecation warnings
+
+jobs:
+
+  # ---------------------------------------------------------------------------
+  # JOB 1: Semantic Release
+  # ---------------------------------------------------------------------------
+  # Reads commit messages since the last release and determines whether a new
+  # version should be created based on Conventional Commits:
+  #   fix:   → patch bump  (1.0.0 → 1.0.1)
+  #   feat:  → minor bump  (1.0.0 → 1.1.0)
+  #   feat!: → major bump  (1.0.0 → 2.0.0)
+  #
+  # If a bump is needed: creates a Git tag, generates CHANGELOG.md, publishes.
+  # If no bump is needed: uses the latest existing tag as the version.
+  #
+  # Outputs:
+  #   version — the semver string used by all downstream jobs (e.g. "1.2.3")
+  # ---------------------------------------------------------------------------
+  release:
+    name: Semantic Release
+    runs-on: self-hosted
+    outputs:
+      version: ${{ steps.semver.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0                     # Full git history needed for semver calculation
+          token: ${{ secrets.GITHUB_TOKEN }} # Token needed to push tags and changelog
+
+      - name: Install python-semantic-release
+        run: |
+          # Install semantic-release and add it to PATH for subsequent steps
+          pip3 install python-semantic-release --break-system-packages --quiet
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Run semantic-release
+        id: semver
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Required to push tags to GitHub
+        run: |
+          source shell/script.sh
+
+          # Check if any commits since last tag warrant a version bump
+          VERSION=$(semantic-release version --print 2>/dev/null || true)
+
+          if [ -z "$VERSION" ]; then
+            # No bumpable commits found — reuse the latest tag
+            VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.1.0")
+            VERSION="${VERSION#v}"   # Strip leading 'v' (e.g. v1.2.3 → 1.2.3)
+            log_message "No version bump — using existing version: $VERSION"
+          else
+            log_message "New version detected: $VERSION"
+            semantic-release version    # Bump version and create Git tag
+            semantic-release changelog  # Generate/update CHANGELOG.md
+            semantic-release publish    # Push tag and changelog to GitHub
+          fi
+
+          # Export version so downstream jobs can use it
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          log_message "Release step complete. Version: $VERSION"
+
+  # ---------------------------------------------------------------------------
+  # JOB 2: Build Docker Image
+  # ---------------------------------------------------------------------------
+  # Builds the Docker image and tags it with the semver version only.
+  # The GIT_SHA is still passed as a build arg so it appears in the app page,
+  # but we no longer push a separate SHA tag to keep the registry clean.
+  # ---------------------------------------------------------------------------
+  build:
+    name: Build Image
+    runs-on: self-hosted
+    needs: release   # Wait for version to be determined before building
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Build Docker image
+        run: |
+          source shell/script.sh
+          VERSION=${{ needs.release.outputs.version }}
+          log_message "Building ${{ env.REGISTRY }}/${{ env.IMAGE }}:${VERSION}..."
+          docker build \
+            --build-arg VERSION=${VERSION} \
+            --build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+            --build-arg GIT_SHA=${{ github.sha }} \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE }}:${VERSION} \
+            .
+          log_message "Build complete."
+
+  # ---------------------------------------------------------------------------
+  # JOB 3: Push to Registry
+  # ---------------------------------------------------------------------------
+  # Pushes only the semver tag to the private local registry.
+  # SHA tags are no longer pushed to prevent image accumulation.
+  # One release = one image tag in the registry.
+  # ---------------------------------------------------------------------------
+  push:
+    name: Push to Registry
+    runs-on: self-hosted
+    needs: [build, release]
+    steps:
+      - name: Push semver tag to local registry
+        run: |
+          source shell/script.sh
+          VERSION=${{ needs.release.outputs.version }}
+          log_message "Pushing ${{ env.REGISTRY }}/${{ env.IMAGE }}:${VERSION}..."
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE }}:${VERSION}
+          log_message "Push complete."
+
+  # ---------------------------------------------------------------------------
+  # JOB 4: Pre-pull on Nodes
+  # ---------------------------------------------------------------------------
+  # Workaround for a bug in containerd v2.2.x where the CRI layer does not
+  # honour the certs.d configuration for plain HTTP registries.
+  #
+  # Without this step, kubelet would try to pull over HTTPS and fail.
+  # This job SSHs into every Kubernetes node and pulls the image directly
+  # into the k8s.io containerd namespace (the namespace kubelet uses),
+  # so the image is already cached when the pod is scheduled.
+  #
+  # Node IPs are discovered dynamically from the Kubernetes API so this
+  # works automatically when new nodes are added to the cluster.
+  # ---------------------------------------------------------------------------
+  pre-pull:
+    name: Pre-pull on Nodes
+    runs-on: self-hosted
+    needs: [push, release]   # Image must be in registry before pulling
+    steps:
+      - name: Pull image into k8s.io namespace on all nodes
+        run: |
+          source shell/script.sh
+          VERSION=${{ needs.release.outputs.version }}
+
+          # Loop over all node IPs in the cluster
+          for node in $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="InternalIP")].address}'); do
+            log_message "Pre-pulling :${VERSION} on node $node..."
+            ssh -o StrictHostKeyChecking=no admin@$node \
+              "sudo ctr -n k8s.io images pull --plain-http \
+              ${{ env.REGISTRY }}/${{ env.IMAGE }}:${VERSION}"
+          done
+          log_message "Pre-pull complete on all nodes."
+
+  # ---------------------------------------------------------------------------
+  # JOB 5: Deploy to Kubernetes
+  # ---------------------------------------------------------------------------
+  # Updates the image tag in k8s/nginx.yaml to the new semver version,
+  # commits it back to Git, and waits for ArgoCD to sync the change.
+  #
+  # Why commit back to Git?
+  #   ArgoCD uses Git as the source of truth (GitOps). If we only run
+  #   kubectl apply, ArgoCD will overwrite it on the next sync. By committing
+  #   the new image tag to Git, ArgoCD detects the change and applies it —
+  #   keeping Git and the cluster always in sync.
+  #
+  # The checkout uses ref: main (not github.sha) to ensure we always work
+  # on the latest commit, including the changelog pushed by the release job.
+  # ---------------------------------------------------------------------------
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: self-hosted
+    needs: [pre-pull, release]   # Image must be pre-pulled before deploying
+    steps:
+      - name: Checkout latest main
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: main                          # Always get latest main, not the trigger SHA
+          token: ${{ secrets.GITHUB_TOKEN }} # Needed to push the updated yaml back
+
+      - name: Update image tag in k8s/nginx.yaml and commit to Git
+        run: |
+          source shell/script.sh
+          VERSION=${{ needs.release.outputs.version }}
+          log_message "Setting image to ${VERSION} in k8s/nginx.yaml..."
+
+          # Replace the image line in nginx.yaml with the new semver tag
+          sed -i "s|image: .*mynginx.*|image: ${{ env.REGISTRY }}/${{ env.IMAGE }}:${VERSION}|" k8s/nginx.yaml
+          grep "image:" k8s/nginx.yaml   # Print updated line for verification
+
+          # Configure git identity for the commit
+          git config user.email "ci@github-actions"
+          git config user.name "GitHub Actions"
+
+          # Use token-based HTTPS for push (SSH not available in pipeline context)
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+
+          git add k8s/nginx.yaml
+
+          # Only commit if the file actually changed (idempotent)
+          git diff --cached --quiet || git commit -m "ci: deploy ${VERSION} [skip ci]"
+
+          # [skip ci] in the message prevents this push from triggering another pipeline run
+          git push origin main
+          log_message "k8s/nginx.yaml committed to Git — ArgoCD will sync."
+
+      - name: Wait for ArgoCD to sync
+        run: |
+          source shell/script.sh
+          log_message "Waiting for ArgoCD to sync..."
+
+          # Wait until the deployment reports Available condition
+          # ArgoCD detects the Git change and applies it within its sync interval
+          kubectl wait --for=condition=available deployment/${{ env.DEPLOYMENT }} \
+            --timeout=180s -n default
+          log_message "Deployment available."
+
+      - name: Verify pods are running
+        run: |
+          source shell/script.sh
+          # Print pod status and which node each pod is running on
+          kubectl get pods -l app=${{ env.DEPLOYMENT }} -o wide
+          log_message "Deployment verified."
+
+  # ---------------------------------------------------------------------------
+  # JOB 6: Cleanup
+  # ---------------------------------------------------------------------------
+  # Removes the locally built Docker image from the runner machine to
+  # prevent disk space from filling up over time.
+  #
+  # Runs with 'if: always()' so cleanup happens even if deploy fails,
+  # ensuring the runner stays clean regardless of pipeline outcome.
+  # ---------------------------------------------------------------------------
+  cleanup:
+    name: Cleanup
+    runs-on: self-hosted
+    needs: [deploy, release]
+    if: always()   # Always run cleanup even if upstream jobs fail
+    steps:
+      - name: Remove local build image
+        run: |
+          source shell/script.sh
+          VERSION=${{ needs.release.outputs.version }}
+          log_message "Removing local image..."
+          docker rmi ${{ env.REGISTRY }}/${{ env.IMAGE }}:${VERSION} || true
+          log_message "Cleanup complete."

@@ -1,0 +1,78 @@
+# =============================================================================
+# Kubernetes Manifest — Ingress for my-nginx
+# -----------------------------------------------------------------------------
+# An Ingress resource defines how external HTTP/HTTPS traffic is routed
+# into the cluster and forwarded to the correct Service.
+#
+# Without Ingress, the only way to access the app externally is via NodePort
+# (a high random port like :30619). Ingress allows access on a friendly
+# hostname (my-nginx.local) on standard port 80.
+#
+# This Ingress requires an Ingress Controller to be installed in the cluster.
+# The controller used here is nginx-ingress (ingressClassName: nginx).
+#
+# To access the app, add this line to /etc/hosts on your machine:
+#   192.168.178.115 my-nginx.local
+# Then open: http://my-nginx.local:30619
+#
+# To apply manually:
+#   kubectl apply -f k8s/ingress.yaml
+#
+# To verify:
+#   kubectl get ingress -n default
+# =============================================================================
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-nginx       # Name of the Ingress resource
+  namespace: default   # Must be in the same namespace as the target Service
+
+  # ---------------------------------------------------------------------------
+  # Annotations — extra configuration passed to the Ingress Controller
+  # ---------------------------------------------------------------------------
+  # Annotations are controller-specific settings that go beyond the standard
+  # Kubernetes Ingress spec. These are read by the nginx-ingress controller.
+  # ---------------------------------------------------------------------------
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    # Rewrites the request path before forwarding to the backend Service.
+    # Example: a request to /app/page is rewritten to /page before hitting nginx.
+    # Here path is /, so no rewrite occurs — included as best practice
+    # for when path-based routing is added in future (e.g. /my-nginx → /)
+
+spec:
+
+  # ---------------------------------------------------------------------------
+  # Ingress Class
+  # ---------------------------------------------------------------------------
+  # Specifies which Ingress Controller should handle this resource.
+  # 'nginx' refers to the nginx-ingress controller installed in the cluster.
+  # Run 'kubectl get ingressclass' to see all available classes.
+  # ---------------------------------------------------------------------------
+  ingressClassName: nginx
+
+  # ---------------------------------------------------------------------------
+  # Rules — defines how incoming requests are routed
+  # ---------------------------------------------------------------------------
+  rules:
+  - host: my-nginx.local
+    # Requests must have the Host header set to 'my-nginx.local' to match.
+    # This requires an /etc/hosts entry on the client machine pointing
+    # my-nginx.local to the cluster node IP (192.168.178.115).
+    # Without this entry the browser cannot resolve the hostname.
+    http:
+      paths:
+      - path: /           # Match all requests starting with /
+                          # To route only a subpath use e.g. path: /api
+
+        pathType: Prefix  # Prefix = match any path starting with the value above
+                          # Exact  = only match the exact path, nothing deeper
+                          # ImplementationSpecific = controller decides the behaviour
+
+        # Backend — the Service to forward matching requests to
+        backend:
+          service:
+            name: my-nginx   # Must match the Service name in nginx.yaml
+            port:
+              number: 80     # Must match the Service port in nginx.yaml

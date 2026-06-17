@@ -1,0 +1,64 @@
+# =============================================================================
+# ArgoCD Application Manifest — my-nginx
+# -----------------------------------------------------------------------------
+# This file defines an ArgoCD Application, which tells ArgoCD what to deploy,
+# where to get it from, and where to deploy it.
+#
+# Once applied, ArgoCD continuously watches the Git repository and
+# automatically syncs any changes to the Kubernetes cluster — this is
+# the core of the GitOps workflow.
+#
+# Apply with:
+#   kubectl apply -f argocd-app.yaml
+# =============================================================================
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: my-nginx        # Name of the ArgoCD Application (shown in the UI)
+  namespace: argocd     # Must be deployed into the argocd namespace
+
+spec:
+  revisionHistoryLimit: 12
+
+  # ---------------------------------------------------------------------------
+  # Project
+  # ---------------------------------------------------------------------------
+  # ArgoCD projects group applications and control access/permissions.
+  # 'default' is the built-in project with no restrictions — fine for homelab.
+  # For production, create a dedicated project with restricted source repos
+  # and destination clusters.
+  # ---------------------------------------------------------------------------
+  project: default
+
+  # ---------------------------------------------------------------------------
+  # Source — where ArgoCD reads the desired state from
+  # ---------------------------------------------------------------------------
+  source:
+    repoURL: https://github.com/agyintom/interview.git  # Git repo to watch
+    targetRevision: main   # Branch to track — any push to main triggers a sync check
+    path: k8s              # Folder inside the repo containing the Kubernetes manifests
+                           # ArgoCD will apply all .yaml files found in this directory
+  
+  # ---------------------------------------------------------------------------
+  # Destination — where ArgoCD deploys to
+  # ---------------------------------------------------------------------------
+  destination:
+    server: https://kubernetes.default.svc  # The local cluster ArgoCD is running in
+                                            # Use a different URL for external clusters
+    namespace: default                      # Kubernetes namespace to deploy resources into
+
+  # ---------------------------------------------------------------------------
+  # Sync Policy — how ArgoCD handles changes
+  # ---------------------------------------------------------------------------
+  syncPolicy:
+
+    automated:
+      prune: true      # Automatically DELETE resources that exist in the cluster
+                       # but are no longer in Git (e.g. if you remove a manifest)
+      selfHeal: true   # Automatically REVERT manual changes made directly with
+                       # kubectl — Git is always the source of truth
+
+    syncOptions:
+      - CreateNamespace=true   # Automatically create the destination namespace
+                               # if it doesn't exist yet

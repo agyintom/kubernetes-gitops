@@ -1,0 +1,94 @@
+# =============================================================================
+# Kubernetes Manifest — my-nginx
+# -----------------------------------------------------------------------------
+# This file defines two Kubernetes resources:
+#   1. Deployment — manages the nginx pods (replicas, image, config)
+#   2. Service    — exposes the pods so they can receive traffic
+#
+# This file is managed by the CI/CD pipeline. The image tag is automatically
+# updated on every release and committed back to Git so ArgoCD can sync it.
+#
+# To apply manually:
+#   kubectl apply -f k8s/nginx.yaml
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# RESOURCE 1: Deployment
+# -----------------------------------------------------------------------------
+# A Deployment tells Kubernetes how many copies (replicas) of the app to run
+# and what container image to use. Kubernetes ensures the desired number of
+# pods are always running — if one crashes, it is automatically restarted.
+# -----------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-nginx   # Name of the deployment — referenced by kubectl and ArgoCD
+
+spec:
+  replicas: 4   # Number of pod copies to run simultaneously
+                # Increase for high availability, decrease to save resources
+                # Change this value and push to Git — ArgoCD will scale automatically
+
+  # Selector tells the Deployment which pods it owns and manages
+  # Must match the labels defined in template.metadata.labels below
+  selector:
+    matchLabels:
+      app: my-nginx
+
+  # Pod template — defines what each replica looks like
+  template:
+    metadata:
+      labels:
+        app: my-nginx   # Label used by the selector above and the Service below
+                        # to identify which pods belong to this deployment
+
+    spec:
+      containers:
+      - name: my-nginx
+
+        # Image is automatically updated by the CI/CD pipeline on each release
+        # Format: <registry>/<name>:<semver-tag>
+        # Do not edit this line manually — the pipeline manages it
+        image: 192.168.178.115:5000/mynginx:1.2.7
+
+        # IfNotPresent — use the locally cached image if available
+        # This is required because the containerd CRI layer has a bug with
+        # plain HTTP registries, so images are pre-pulled by the pipeline
+        # into the k8s.io namespace before deployment
+        imagePullPolicy: IfNotPresent
+
+        ports:
+        - containerPort: 80   # Port the nginx process listens on inside the container
+
+---
+
+# -----------------------------------------------------------------------------
+# RESOURCE 2: Service
+# -----------------------------------------------------------------------------
+# A Service gives the pods a stable network endpoint. Without a Service,
+# pods are only reachable by their internal IP which changes every restart.
+#
+# This Service is type NodePort, which exposes the app on a port on every
+# node in the cluster (e.g. 192.168.178.115:30xxx).
+#
+# Note: NodePort is used here for simplicity. For production, prefer
+# ClusterIP + Ingress which gives a cleaner URL and supports SSL.
+# -----------------------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-nginx   # Must match the backend service name in the Ingress resource
+
+spec:
+  # Routes traffic to all pods that have the label app=my-nginx
+  selector:
+    app: my-nginx
+
+  ports:
+  - port: 80         # Port the Service listens on (cluster-internal)
+    targetPort: 80   # Port on the pod to forward traffic to (must match containerPort)
+
+  # NodePort exposes the service on a static port on every node
+  # Kubernetes assigns a random port in the range 30000-32767
+  # Access via: http://<any-node-ip>:<assigned-nodeport>
+  type: ClusterIP

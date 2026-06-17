@@ -1,0 +1,49 @@
+# =============================================================================
+# .gitignore — Git Ignore Rules
+# -----------------------------------------------------------------------------
+# Lists files and directories that Git should NOT track or commit.
+# This keeps the repository clean by excluding generated files, binaries,
+# secrets, and local tooling that should not be shared or version controlled.
+#
+# Rules use glob patterns:
+#   *          — matches any string of characters
+#   **/        — matches any directory at any depth
+#   *.tar.gz   — matches any file ending in .tar.gz
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# GitHub Actions self-hosted runner
+# -----------------------------------------------------------------------------
+# The runner directory contains the GitHub Actions runner binary and its
+# working files. This is installed locally on the machine to execute pipeline
+# jobs but should never be committed to the repository.
+#
+# Contains: runner binaries, credentials, temporary job workspaces, logs.
+# These are machine-specific and may contain sensitive authentication tokens.
+# -----------------------------------------------------------------------------
+shell/actions-runner/
+
+# -----------------------------------------------------------------------------
+# Node.js binaries
+# -----------------------------------------------------------------------------
+# Excludes any file or directory named 'node' at any depth in the repo.
+# The **/ prefix means this matches 'node' anywhere in the directory tree,
+# not just at the root level.
+#
+# This prevents accidentally committing compiled Node.js binaries or
+# node executable files that may be downloaded by tools or scripts.
+# -----------------------------------------------------------------------------
+**/node
+
+# -----------------------------------------------------------------------------
+# Compressed archives
+# -----------------------------------------------------------------------------
+# Excludes all .tar.gz files from being tracked by Git.
+# These are typically downloaded packages, build artifacts, or release
+# archives that are large, binary, and can be re-downloaded or regenerated.
+#
+# Examples that would be ignored:
+#   actions-runner-linux-x64-2.x.x.tar.gz  (runner install archive)
+#   any-build-artifact.tar.gz
+# -----------------------------------------------------------------------------
+*.tar.gz

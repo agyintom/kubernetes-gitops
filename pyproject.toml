@@ -1,0 +1,107 @@
+# =============================================================================
+# pyproject.toml — python-semantic-release Configuration
+# -----------------------------------------------------------------------------
+# This file configures semantic-release, the tool that automatically
+# determines the next version number, generates the CHANGELOG.md, and
+# creates Git tags based on commit message conventions.
+#
+# How it works:
+#   1. On every push to main, the pipeline runs semantic-release
+#   2. It reads all commits since the last release tag
+#   3. It determines the version bump based on commit message prefixes
+#   4. It creates a Git tag, updates this file, and generates the changelog
+#
+# Commit message convention (Conventional Commits):
+#   fix: ...        → patch bump  (1.0.0 → 1.0.1)
+#   feat: ...       → minor bump  (1.0.0 → 1.1.0)
+#   feat!: ...      → major bump  (1.0.0 → 2.0.0)
+#   ci/docs/chore:  → no bump, no release
+#
+# Install:
+#   pip3 install python-semantic-release --break-system-packages
+#
+# Run manually:
+#   semantic-release version --print   # preview next version
+#   semantic-release changelog --print # preview changelog
+# =============================================================================
+
+[tool.semantic_release]
+
+# -----------------------------------------------------------------------------
+# Version source
+# -----------------------------------------------------------------------------
+# Tells semantic-release where to read and write the current version number.
+# It will update this value automatically when a new release is made.
+# Format: "<file>:<toml-key-path>"
+# -----------------------------------------------------------------------------
+version_toml = ["pyproject.toml:tool.semantic_release.version"]
+
+# The branch to track for releases — only commits on this branch trigger releases
+branch = "main"
+
+# No build command needed — we are not building a Python package
+# The Docker image build is handled separately by the CI/CD pipeline
+build_command = ""
+
+# This is not a Python package — do not publish to PyPI
+upload_to_pypi = false
+
+# Publish the release to GitHub (creates a GitHub Release with the changelog)
+upload_to_release = true
+
+# Commit message used when semantic-release writes back the version bump.
+# [skip ci] prevents this commit from triggering another pipeline run.
+# {version} is replaced with the actual version number (e.g. 1.2.3)
+commit_message = "ci: release {version} [skip ci]"
+
+# Current version — managed automatically by semantic-release.
+# Do not edit this manually; it is updated on every release.
+version = "1.2.7"
+
+# -----------------------------------------------------------------------------
+# Commit parser options
+# -----------------------------------------------------------------------------
+# Defines which commit prefixes semantic-release recognises and how they
+# map to version bump types.
+#
+# allowed_tags  — prefixes that are included in the changelog
+# minor_tags    — prefixes that trigger a minor (feature) version bump
+# patch_tags    — prefixes that trigger a patch (bugfix) version bump
+#
+# Any tag not in minor_tags or patch_tags (e.g. ci, docs, chore) is
+# included in the changelog if in allowed_tags but does NOT trigger a bump.
+# -----------------------------------------------------------------------------
+[tool.semantic_release.commit_parser_options]
+allowed_tags = ["feat", "fix", "perf", "refactor", "ci", "docs", "style", "chore"]
+minor_tags   = ["feat"]                    # feat: → minor bump (new feature)
+patch_tags   = ["fix", "perf", "refactor"] # fix/perf/refactor: → patch bump
+
+# -----------------------------------------------------------------------------
+# Remote (GitHub) configuration
+# -----------------------------------------------------------------------------
+# Tells semantic-release to push tags and releases to GitHub.
+# The token is read from the GH_TOKEN environment variable, which is
+# injected by the pipeline using secrets.GITHUB_TOKEN.
+# Never hardcode the token value here.
+# -----------------------------------------------------------------------------
+[tool.semantic_release.remote]
+type  = "github"
+token = { env = "GH_TOKEN" }   # Read from environment — set in pipeline as GH_TOKEN
+
+# -----------------------------------------------------------------------------
+# Changelog configuration
+# -----------------------------------------------------------------------------
+# Controls how CHANGELOG.md is generated and which commits are included.
+#
+# default_templates.changelog_file — path to the changelog file
+# exclude_commit_patterns — regex patterns for commits to EXCLUDE from the
+#   changelog. CI automation commits are excluded to keep the changelog clean
+#   and focused on real changes made by developers.
+# -----------------------------------------------------------------------------
+[tool.semantic_release.changelog]
+default_templates = { changelog_file = "CHANGELOG.md" }
+
+exclude_commit_patterns = [
+  "ci:.*\\[skip ci\\]",   # Exclude all automated pipeline commits (image updates,
+                           # version bumps, deploy commits) from the changelog
+]
