@@ -35,7 +35,7 @@ spec:
   # Source — where ArgoCD reads the desired state from
   # ---------------------------------------------------------------------------
   source:
-    repoURL: https://github.com/agyintom/interview.git  # Git repo to watch
+    repoURL: https://github.com/agyintom/kubernetes-gitops.git  # Git repo to watch
     targetRevision: main   # Branch to track — any push to main triggers a sync check
     path: k8s              # Folder inside the repo containing the Kubernetes manifests
                            # ArgoCD will apply all .yaml files found in this directory
