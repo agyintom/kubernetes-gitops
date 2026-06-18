@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Infracore — DevOps, Platform Engineering & Infrastructure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --lime:#C8F23C;
+  --lime-dark:#9BBF1A;
+  --lime-deep:#5A7A00;
+  --coral:#FF5C3A;
+  --coral-light:#FF8A70;
+  --sky:#3AB8FF;
+  --sky-light:#A8E2FF;
+  --violet:#7B4FFF;
+  --violet-light:#C4ADFF;
+  --ink:#0F0F10;
+  --ink2:#1A1A1E;
+  --ink3:#26262C;
+  --mid:#5C5C6E;
+  --soft:#8E8EA0;
+  --pale:#F2F2F7;
+  --white:#FFFFFF;
+  --f:'Plus Jakarta Sans',sans-serif;
+  --r:14px;
+  --rl:20px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--f);background:var(--white);color:var(--ink);overflow-x:hidden;line-height:1.6}
+
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 5%;height:68px;
+  background:rgba(15,15,16,0.96);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.logo{font-size:1.3rem;font-weight:800;color:var(--white);text-decoration:none;letter-spacing:-0.03em}
+.logo span{color:var(--lime)}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{color:rgba(255,255,255,0.55);text-decoration:none;font-size:.875rem;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--white)}
+.nav-right{display:flex;gap:1rem;align-items:center}
+.btn-ghost{color:rgba(255,255,255,0.65);font-size:.875rem;font-weight:500;text-decoration:none;padding:.5rem 1rem}
+.btn-lime{background:var(--lime);color:var(--ink);font-size:.875rem;font-weight:700;padding:.55rem 1.25rem;border-radius:100px;text-decoration:none;transition:background .2s,transform .15s}
+.btn-lime:hover{background:#d8ff50;transform:translateY(-1px)}
+
+#hero{
+  min-height:100vh;
+  background:var(--ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;
+  padding:120px 5% 80px;
+  position:relative;overflow:hidden;
+}
+.hero-blob{
+  position:absolute;width:800px;height:800px;border-radius:50%;
+  background:radial-gradient(circle,rgba(200,242,60,.07) 0%,transparent 65%);
+  top:-200px;left:50%;transform:translateX(-50%);pointer-events:none;
+}
+.hero-blob2{
+  position:absolute;width:400px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(58,184,255,.06) 0%,transparent 65%);
+  bottom:0;right:10%;pointer-events:none;
+}
+.hero-pill{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:rgba(200,242,60,.1);border:1px solid rgba(200,242,60,.25);
+  color:var(--lime);font-size:.75rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  padding:.35rem 1rem;border-radius:100px;margin-bottom:2rem;
+}
+.hero-pill::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--lime)}
+#hero h1{
+  font-size:clamp(3rem,6vw,5.5rem);font-weight:800;line-height:1.0;letter-spacing:-.04em;
+  color:var(--white);max-width:900px;margin:0 auto 1.5rem;
+}
+#hero h1 em{font-style:normal;color:var(--lime)}
+#hero h1 span{color:rgba(255,255,255,.35)}
+.hero-sub{font-size:1.125rem;color:rgba(255,255,255,.5);max-width:560px;margin:0 auto 2.5rem;font-weight:400;line-height:1.75}
+.hero-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:4rem}
+.btn-primary-lg{
+  background:var(--lime);color:var(--ink);
+  font-weight:700;font-size:1rem;
+  padding:.875rem 2rem;border-radius:100px;
+  text-decoration:none;transition:background .2s,transform .15s;
+  display:inline-flex;align-items:center;gap:.5rem;
+}
+.btn-primary-lg:hover{background:#d8ff50;transform:translateY(-2px)}
+.btn-outline-lg{
+  border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.7);
+  font-weight:500;font-size:1rem;
+  padding:.875rem 2rem;border-radius:100px;
+  text-decoration:none;transition:border-color .2s,color .2s;
+  display:inline-flex;align-items:center;gap:.5rem;
+}
+.btn-outline-lg:hover{border-color:rgba(255,255,255,.5);color:var(--white)}
+.hero-stats{
+  display:flex;gap:3rem;justify-content:center;flex-wrap:wrap;
+  padding-top:3rem;border-top:1px solid rgba(255,255,255,.06);
+  position:relative;z-index:1;
+}
+.h-stat .num{font-size:2rem;font-weight:800;color:var(--white);letter-spacing:-.03em;line-height:1}
+.h-stat .num span{color:var(--lime)}
+.h-stat .lbl{font-size:.8rem;color:rgba(255,255,255,.4);margin-top:.25rem}
+
+#who{background:var(--pale);padding:6rem 5%}
+.section-eyebrow{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);margin-bottom:.75rem}
+.section-title{font-size:clamp(1.75rem,3vw,2.5rem);font-weight:800;letter-spacing:-.03em;color:var(--ink);line-height:1.15;margin-bottom:1rem}
+.section-title strong{color:var(--coral)}
+.section-body{font-size:1.0625rem;color:var(--mid);max-width:540px;line-height:1.75;margin-bottom:3rem}
+.who-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem}
+.who-card{
+  background:var(--white);border-radius:var(--rl);
+  padding:2rem 1.75rem;
+  border:1px solid rgba(0,0,0,.06);
+  transition:transform .2s,box-shadow .2s;
+  cursor:default;position:relative;overflow:hidden;
+}
+.who-card::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:3px;
+  background:var(--lime);transform:scaleX(0);transform-origin:left;transition:transform .3s;
+}
+.who-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.08)}
+.who-card:hover::after{transform:scaleX(1)}
+.who-icon{
+  width:52px;height:52px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.5rem;margin-bottom:1.25rem;
+}
+.who-card h3{font-size:1.0625rem;font-weight:700;letter-spacing:-.02em;margin-bottom:.5rem;color:var(--ink)}
+.who-card p{font-size:.875rem;color:var(--mid);line-height:1.6;margin-bottom:1.25rem}
+.who-link{font-size:.8rem;font-weight:700;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;gap:.35rem}
+.who-link::after{content:'→';transition:transform .2s}
+.who-card:hover .who-link::after{transform:translateX(4px)}
+
+#logos{background:var(--white);padding:4rem 5%;border-top:1px solid rgba(0,0,0,.05);border-bottom:1px solid rgba(0,0,0,.05)}
+.logos-label{font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);text-align:center;margin-bottom:2rem}
+.logos-track{display:flex;flex-wrap:wrap;gap:1rem 2rem;justify-content:center;align-items:center}
+.logo-pill{
+  font-size:.875rem;font-weight:700;color:var(--soft);letter-spacing:.02em;
+  padding:.5rem 1.25rem;border:1px solid rgba(0,0,0,.08);border-radius:100px;
+  background:var(--pale);
+}
+
+#why{background:var(--ink);padding:6rem 5%;color:var(--white)}
+.why-inner{display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:center}
+.why-left .section-eyebrow{color:rgba(200,242,60,.6)}
+.why-left .section-title{color:var(--white)}
+.why-left .section-title strong{color:var(--lime)}
+.why-left .section-body{color:rgba(255,255,255,.5);max-width:100%}
+.why-stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);border-radius:var(--rl);overflow:hidden}
+.why-stat{background:var(--ink2);padding:2rem;transition:background .2s}
+.why-stat:hover{background:var(--ink3)}
+.why-stat .n{font-size:2.5rem;font-weight:800;letter-spacing:-.04em;color:var(--white);line-height:1}
+.why-stat .n em{font-style:normal;color:var(--lime)}
+.why-stat .t{font-size:.8rem;color:rgba(255,255,255,.4);margin-top:.4rem;line-height:1.5}
+.feature-list{margin-top:2rem;display:flex;flex-direction:column;gap:.75rem}
+.feature-item{display:flex;gap:.875rem;align-items:flex-start}
+.feat-dot{width:24px;height:24px;border-radius:6px;background:rgba(200,242,60,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--lime);font-size:.8rem;font-weight:700;margin-top:2px}
+.feature-item p{font-size:.9rem;color:rgba(255,255,255,.55);line-height:1.55}
+.feature-item p strong{color:var(--white);font-weight:600}
+
+#services{padding:6rem 5%;background:var(--white)}
+.services-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:3rem;flex-wrap:wrap;gap:1.5rem}
+.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.svc-card{
+  border-radius:var(--rl);padding:2rem;
+  border:1px solid rgba(0,0,0,.07);
+  transition:transform .2s,box-shadow .2s;
+  cursor:default;
+}
+.svc-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.08)}
+.svc-card.c-lime{background:#F4FDE0;border-color:#D9F2A0}
+.svc-card.c-coral{background:#FFF0ED;border-color:#FFD0C5}
+.svc-card.c-sky{background:#E6F7FF;border-color:#B3E8FF}
+.svc-card.c-violet{background:#F2EDFF;border-color:#D8CCFF}
+.svc-card.c-amber{background:#FFF8E6;border-color:#FFE9A0}
+.svc-card.c-ink{background:var(--ink);border-color:transparent}
+.svc-icon{font-size:1.75rem;margin-bottom:1.25rem;display:block}
+.svc-card h3{font-size:1rem;font-weight:700;letter-spacing:-.02em;margin-bottom:.6rem}
+.svc-card.c-ink h3{color:var(--white)}
+.svc-card p{font-size:.85rem;color:var(--mid);line-height:1.6;margin-bottom:1.25rem}
+.svc-card.c-ink p{color:rgba(255,255,255,.5)}
+.svc-tags{display:flex;flex-wrap:wrap;gap:.35rem}
+.svc-tag{font-size:.7rem;font-weight:600;padding:.25rem .65rem;border-radius:100px}
+.c-lime .svc-tag{background:#D4F09A;color:#3A6000}
+.c-coral .svc-tag{background:#FFD0C5;color:#8C2A14}
+.c-sky .svc-tag{background:#B3E8FF;color:#004E80}
+.c-violet .svc-tag{background:#D8CCFF;color:#3A1E8C}
+.c-amber .svc-tag{background:#FFE9A0;color:#6B4000}
+.c-ink .svc-tag{background:rgba(200,242,60,.15);color:var(--lime)}
+.svc-outcome{margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid rgba(0,0,0,.07);font-size:.8rem;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:.35rem}
+.c-ink .svc-outcome{border-top-color:rgba(255,255,255,.08);color:var(--lime)}
+.svc-outcome::before{content:'✓';color:inherit}
+.svc-badge{
+  position:absolute;top:1rem;right:1rem;
+  font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  background:var(--lime);color:var(--ink);
+  padding:.2rem .6rem;border-radius:100px;
+}
+
+#sectors{background:var(--pale);padding:6rem 5%}
+.sector-tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:2.5rem}
+.sector-tab{
+  padding:.5rem 1.25rem;border-radius:100px;font-size:.875rem;font-weight:600;
+  border:1px solid rgba(0,0,0,.1);background:transparent;color:var(--mid);
+  cursor:pointer;transition:all .2s;
+}
+.sector-tab.active{background:var(--ink);color:var(--white);border-color:var(--ink)}
+.sector-tab:hover:not(.active){background:var(--white);color:var(--ink)}
+.sector-panel{display:none;grid-template-columns:1fr 1fr;gap:3rem;align-items:center}
+.sector-panel.active{display:grid}
+.sector-visual{
+  border-radius:var(--rl);padding:2.5rem;min-height:280px;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  position:relative;overflow:hidden;
+}
+.sector-visual.lime{background:#C8F23C}
+.sector-visual.coral{background:#FF5C3A}
+.sector-visual.sky{background:#3AB8FF}
+.sector-visual.violet{background:#7B4FFF}
+.sector-visual.amber{background:#FFB800}
+.sector-num{font-size:6rem;font-weight:800;line-height:1;letter-spacing:-.04em;opacity:.18;position:absolute;top:1rem;right:1.5rem}
+.sector-visual.lime .sector-num{color:var(--ink)}
+.sector-visual.coral .sector-num,.sector-visual.sky .sector-num,.sector-visual.violet .sector-num{color:var(--white)}
+.sector-visual.amber .sector-num{color:var(--ink)}
+.sector-visual h3{font-size:1.5rem;font-weight:800;letter-spacing:-.03em;position:relative;z-index:1}
+.sector-visual.lime h3{color:var(--ink)}
+.sector-visual.coral h3,.sector-visual.sky h3,.sector-visual.violet h3{color:var(--white)}
+.sector-visual.amber h3{color:var(--ink)}
+.sector-info h4{font-size:1.25rem;font-weight:700;letter-spacing:-.02em;margin-bottom:.75rem;color:var(--ink)}
+.sector-info p{font-size:.9375rem;color:var(--mid);line-height:1.75;margin-bottom:1.5rem}
+.pain-chips{display:flex;flex-wrap:wrap;gap:.5rem}
+.pain-chip{font-size:.75rem;font-weight:600;padding:.35rem .875rem;border-radius:100px;background:rgba(255,92,58,.1);color:var(--coral);border:1px solid rgba(255,92,58,.2)}
+
+#phases{background:var(--white);padding:6rem 5%}
+.phases-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem}
+.phase-card{
+  border-radius:var(--rl);padding:2.5rem 2rem;
+  border:1px solid rgba(0,0,0,.07);
+  position:relative;
+}
+.phase-num-big{
+  font-size:4rem;font-weight:800;line-height:1;letter-spacing:-.04em;
+  margin-bottom:1.5rem;
+}
+.phase-card:nth-child(1) .phase-num-big{color:var(--lime)}
+.phase-card:nth-child(2) .phase-num-big{color:var(--sky)}
+.phase-card:nth-child(3) .phase-num-big{color:var(--violet)}
+.phase-card h3{font-size:1.1rem;font-weight:700;letter-spacing:-.02em;margin-bottom:.75rem;color:var(--ink)}
+.phase-card p{font-size:.875rem;color:var(--mid);line-height:1.65;margin-bottom:1.25rem}
+.phase-items{list-style:none;display:flex;flex-direction:column;gap:.5rem}
+.phase-items li{font-size:.825rem;color:var(--mid);display:flex;gap:.5rem}
+.phase-items li::before{content:'→';color:var(--ink);font-weight:700;flex-shrink:0}
+.phase-connector{
+  position:absolute;top:3rem;right:-1.75rem;
+  width:3rem;height:2px;background:rgba(0,0,0,.1);z-index:1;
+}
+.phase-connector::after{content:'';position:absolute;right:0;top:-4px;width:0;height:0;border-left:8px solid rgba(0,0,0,.12);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.phase-card:last-child .phase-connector{display:none}
+
+#results{background:var(--ink);padding:6rem 5%;color:var(--white)}
+.results-top{text-align:center;max-width:640px;margin:0 auto 4rem}
+.results-top .section-title{color:var(--white)}
+.results-top .section-body{color:rgba(255,255,255,.5);max-width:100%}
+.results-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.result-card{background:var(--ink2);border:1px solid rgba(255,255,255,.06);border-radius:var(--rl);padding:2rem;transition:background .2s}
+.result-card:hover{background:var(--ink3)}
+.result-logo{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(255,255,255,.06)}
+.result-metric{font-size:2.5rem;font-weight:800;letter-spacing:-.04em;line-height:1;margin-bottom:.5rem}
+.result-card:nth-child(1) .result-metric{color:var(--lime)}
+.result-card:nth-child(2) .result-metric{color:var(--coral-light)}
+.result-card:nth-child(3) .result-metric{color:var(--sky)}
+.result-card h4{font-size:.9375rem;font-weight:600;color:var(--white);margin-bottom:.5rem}
+.result-card p{font-size:.825rem;color:rgba(255,255,255,.45);line-height:1.6}
+
+#pricing{background:var(--pale);padding:6rem 5%}
+.pricing-top{max-width:560px;margin-bottom:3rem}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;align-items:start}
+.price-card{background:var(--white);border:1px solid rgba(0,0,0,.08);border-radius:var(--rl);overflow:hidden}
+.price-card.featured{border-color:var(--ink);border-width:2px}
+.price-head{padding:1.75rem;border-bottom:1px solid rgba(0,0,0,.06)}
+.price-card.featured .price-head{background:var(--ink)}
+.price-name{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);margin-bottom:.75rem}
+.price-card.featured .price-name{color:rgba(200,242,60,.7)}
+.price-amt{font-size:2.25rem;font-weight:800;letter-spacing:-.04em;color:var(--ink);line-height:1}
+.price-card.featured .price-amt{color:var(--white)}
+.price-sub{font-size:.8rem;color:var(--soft);margin-top:.3rem}
+.price-card.featured .price-sub{color:rgba(255,255,255,.4)}
+.price-body{padding:1.75rem}
+.price-desc{font-size:.875rem;color:var(--mid);margin-bottom:1.25rem;line-height:1.65}
+.price-feats{list-style:none;display:flex;flex-direction:column;gap:.6rem}
+.price-feats li{font-size:.875rem;color:var(--ink);display:flex;gap:.5rem;align-items:flex-start}
+.price-feats li::before{content:'✓';color:#2E7D00;font-weight:700;flex-shrink:0}
+.price-cta-btn{
+  display:block;text-align:center;margin-top:1.75rem;
+  padding:.75rem;border-radius:100px;font-weight:700;font-size:.875rem;
+  text-decoration:none;border:1.5px solid var(--ink);color:var(--ink);
+  transition:all .2s;background:transparent;
+}
+.price-cta-btn:hover{background:var(--ink);color:var(--white)}
+.price-card.featured .price-cta-btn{background:var(--lime);border-color:var(--lime);color:var(--ink)}
+.price-card.featured .price-cta-btn:hover{background:#d8ff50}
+
+#cta-band{
+  background:var(--lime);padding:5rem 5%;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:2rem;
+}
+.cta-band-text h2{font-size:clamp(1.5rem,3vw,2.25rem);font-weight:800;letter-spacing:-.03em;color:var(--ink);max-width:540px;line-height:1.2}
+.cta-band-text p{font-size:1rem;color:rgba(15,15,16,.6);margin-top:.75rem}
+.cta-band-actions{display:flex;gap:1rem;flex-wrap:wrap}
+.btn-ink{background:var(--ink);color:var(--white);font-weight:700;font-size:.9375rem;padding:.875rem 2rem;border-radius:100px;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;transition:background .2s,transform .15s}
+.btn-ink:hover{background:#2a2a30;transform:translateY(-1px)}
+.btn-clear{border:1.5px solid rgba(15,15,16,.25);color:var(--ink);font-weight:600;font-size:.9375rem;padding:.875rem 2rem;border-radius:100px;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;transition:border-color .2s}
+.btn-clear:hover{border-color:var(--ink)}
+
+#contact{background:var(--ink2);padding:6rem 5%}
+.contact-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:6rem}
+.contact-left .section-title{color:var(--white)}
+.contact-left .section-body{color:rgba(255,255,255,.45);max-width:100%}
+.contact-details{display:flex;flex-direction:column;gap:1rem;margin-top:2rem}
+.cd{display:flex;gap:1rem;align-items:flex-start;font-size:.9rem;color:rgba(255,255,255,.55)}
+.cd strong{color:var(--white);display:block;margin-bottom:.1rem;font-size:.8rem;letter-spacing:.05em;text-transform:uppercase;font-size:.7rem}
+.contact-form{display:flex;flex-direction:column;gap:1rem}
+.cf-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.cf-field{display:flex;flex-direction:column;gap:.4rem}
+.cf-field label{font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.35)}
+.cf-field input,.cf-field select,.cf-field textarea{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;
+  padding:.75rem 1rem;color:var(--white);font-family:var(--f);font-size:.9rem;outline:none;
+  transition:border-color .2s;resize:vertical;
+}
+.cf-field input::placeholder,.cf-field textarea::placeholder{color:rgba(255,255,255,.2)}
+.cf-field input:focus,.cf-field textarea:focus{border-color:var(--lime)}
+.cf-field select{appearance:none;color:rgba(255,255,255,.7)}
+.cf-field select option{background:var(--ink2)}
+.cf-submit{
+  background:var(--lime);color:var(--ink);border:none;padding:.875rem 2.5rem;border-radius:100px;
+  font-family:var(--f);font-size:.9375rem;font-weight:700;cursor:pointer;
+  transition:background .2s,transform .15s;align-self:flex-start;
+}
+.cf-submit:hover{background:#d8ff50;transform:translateY(-1px)}
+.cf-note{font-size:.75rem;color:rgba(255,255,255,.25);margin-top:.5rem}
+
+footer{background:var(--ink);padding:3rem 5%;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1.5rem;border-top:1px solid rgba(255,255,255,.05)}
+.foot-logo{font-size:1.1rem;font-weight:800;color:var(--white);text-decoration:none;letter-spacing:-.03em}
+.foot-logo span{color:var(--lime)}
+.foot-links{display:flex;gap:2rem}
+.foot-links a{font-size:.825rem;color:rgba(255,255,255,.35);text-decoration:none;transition:color .2s}
+.foot-links a:hover{color:var(--white)}
+.foot-copy{font-size:.775rem;color:rgba(255,255,255,.2)}
+
+.fade{opacity:0;transform:translateY(20px);transition:opacity .55s ease,transform .55s ease}
+.fade.in{opacity:1;transform:none}
+
+.version-bar{position:fixed;bottom:0;left:0;right:0;background:#000;color:#9aff4d;font-size:.7rem;padding:.5rem 1rem;text-align:center;font-family:monospace;z-index:999;letter-spacing:.02em}
+
+@media(max-width:900px){
+  nav{padding:0 4%}
+  .nav-links{display:none}
+  #hero{padding:100px 5% 60px}
+  .hero-stats{gap:1.5rem}
+  .why-inner,.contact-grid,.sector-panel.active{grid-template-columns:1fr}
+  .services-grid,.phases-grid,.results-grid,.pricing-grid{grid-template-columns:1fr}
+  .price-card.featured{transform:none}
+  #cta-band{flex-direction:column}
+  .cf-row{grid-template-columns:1fr}
+  footer{flex-direction:column;text-align:center}
+  .foot-links{justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">Infra<span>core</span></a>
+  <ul class="nav-links">
+    <li><a href="#who">Solutions</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#phases">Approach</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="#" class="btn-ghost">Log in</a>
+    <a href="#contact" class="btn-lime">Get started</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-blob"></div>
+  <div class="hero-blob2"></div>
+  <div class="hero-pill">DevOps &amp; Platform Engineering & Infrastructure</div>
+  <h1 class="fade">Your infrastructure, <em>finally</em> <span>working.</span></h1>
+  <p class="hero-sub fade">Stop firefighting downtime. Stop manual deployments. Stop guessing at cloud costs. Infracore modernises your infrastructure so your team can ship with confidence.</p>
+  <div class="hero-actions fade">
+    <a href="#contact" class="btn-primary-lg">Get a free assessment →</a>
+    <a href="#services" class="btn-outline-lg">See what we do</a>
+  </div>
+  <div class="hero-stats fade">
+    <div class="h-stat"><div class="num">72<span>%</span></div><div class="lbl">of Ghanaian companies still deploy manually</div></div>
+    <div class="h-stat"><div class="num">3<span>×</span></div><div class="lbl">faster releases after CI/CD setup</div></div>
+    <div class="h-stat"><div class="num">40<span>%</span></div><div class="lbl">typical cloud cost reduction</div></div>
+    <div class="h-stat"><div class="num">24<span>h</span></div><div class="lbl">average time-to-first-fix with Infracore</div></div>
+  </div>
+</section>
+
+<!-- LOGOS -->
+<section id="logos">
+  <div class="logos-label">Trusted by companies across Ghana &amp; West Africa</div>
+  <div class="logos-track">
+    <span class="logo-pill">Fintech Ghana</span>
+    <span class="logo-pill">TechCorp Accra</span>
+    <span class="logo-pill">PayNow Africa</span>
+    <span class="logo-pill">CloudBase GH</span>
+    <span class="logo-pill">SwiftLogistics</span>
+    <span class="logo-pill">EduPortal GH</span>
+    <span class="logo-pill">Telecoms Co.</span>
+    <span class="logo-pill">DataFlow Ltd</span>
+  </div>
+</section>
+
+<!-- WHO ARE YOU -->
+<section id="who">
+  <div class="fade">
+    <div class="section-eyebrow">Tell us who you are</div>
+    <h2 class="section-title">We build solutions <strong>around your goals</strong></h2>
+    <p class="section-body">Pick your path. We've designed specific engagement models for each type of organisation, so you get exactly what you need — not a generic package.</p>
+  </div>
+  <div class="who-grid fade">
+    <div class="who-card">
+      <div class="who-icon" style="background:#F4FDE0">🏢</div>
+      <h3>Businesses &amp; Enterprises</h3>
+      <p>Legacy infrastructure holding you back? We modernise your stack and automate operations so your teams can move fast without breaking things.</p>
+      <a href="#contact" class="who-link">Start modernising</a>
+    </div>
+    <div class="who-card">
+      <div class="who-icon" style="background:#FFF0ED">🚀</div>
+      <h3>Startups &amp; Fintechs</h3>
+      <p>Build on solid foundations from day one. We set up CI/CD, cloud infrastructure, and monitoring so you can grow without re-engineering everything at scale.</p>
+      <a href="#contact" class="who-link">Build it right</a>
+    </div>
+    <div class="who-card">
+      <div class="who-icon" style="background:#E6F7FF">💻</div>
+      <h3>Software Houses</h3>
+      <p>Still deploying with SSH and prayers? We professionalise your delivery pipeline — automated tests, staging environments, safe rollbacks included.</p>
+      <a href="#contact" class="who-link">Upgrade your pipeline</a>
+    </div>
+    <div class="who-card">
+      <div class="who-icon" style="background:#F2EDFF">🏛️</div>
+      <h3>Government &amp; NGOs</h3>
+      <p>Auditable, compliant, resilient. We bring modern infrastructure practices to public sector organisations without the enterprise price tag.</p>
+      <a href="#contact" class="who-link">Explore for your org</a>
+    </div>
+  </div>
+</section>
+
+<!-- WHY INFRACORE -->
+<section id="why">
+  <div class="why-inner">
+    <div class="why-left fade">
+      <div class="section-eyebrow">Why Infracore</div>
+      <h2 class="section-title">The right infrastructure <strong>changes everything</strong></h2>
+      <p class="section-body">We combine enterprise operations experience with deep cloud expertise — built for Ghana's specific constraints, priced for Ghana's market.</p>
+      <div class="feature-list">
+        <div class="feature-item">
+          <div class="feat-dot">✓</div>
+          <p><strong>Infrastructure-first thinking.</strong> We understand what runs underneath — Linux, networking, storage — not just the developer tooling on top.</p>
+        </div>
+        <div class="feature-item">
+          <div class="feat-dot">✓</div>
+          <p><strong>Local presence, international standards.</strong> Based in Accra. Meet us, call us, hold us accountable. Same quality as any London consultancy.</p>
+        </div>
+        <div class="feature-item">
+          <div class="feat-dot">✓</div>
+          <p><strong>Security and compliance built in.</strong> ITIL-aligned processes and ISO 27001 awareness in every design decision, not bolted on after.</p>
+        </div>
+        <div class="feature-item">
+          <div class="feat-dot">✓</div>
+          <p><strong>Priced for your growth stage.</strong> No European rate cards. Transparent, outcome-based pricing that fits where your business is today.</p>
+        </div>
+      </div>
+    </div>
+    <div class="why-stats fade">
+      <div class="why-stat">
+        <div class="n">72<em>%</em></div>
+        <div class="t">of Ghanaian businesses have no automated deployments</div>
+      </div>
+      <div class="why-stat">
+        <div class="n">£0</div>
+        <div class="t">cost for our initial infrastructure assessment — no strings</div>
+      </div>
+      <div class="why-stat">
+        <div class="n">10<em>+</em></div>
+        <div class="t">years of combined infrastructure &amp; cloud experience</div>
+      </div>
+      <div class="why-stat">
+        <div class="n">48<em>h</em></div>
+        <div class="t">typical time from first call to your assessment report</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="services-header fade">
+    <div>
+      <div class="section-eyebrow">Services</div>
+      <h2 class="section-title" style="margin-bottom:0">What we deliver</h2>
+    </div>
+    <a href="#contact" class="btn-lime" style="font-size:.875rem;padding:.65rem 1.5rem">Book a free call →</a>
+  </div>
+  <div class="services-grid fade">
+    <div class="svc-card c-lime">
+      <span class="svc-icon">🏗️</span>
+      <h3>Infrastructure Automation</h3>
+      <p>Version-controlled, repeatable infrastructure. Never hand-craft a server again — spin up identical environments in minutes.</p>
+      <div class="svc-tags">
+        <span class="svc-tag">Terraform</span>
+        <span class="svc-tag">Ansible</span>
+        <span class="svc-tag">Docker</span>
+      </div>
+      <div class="svc-outcome">Repeatable infrastructure in days</div>
+    </div>
+    <div class="svc-card c-coral">
+      <span class="svc-icon">🚀</span>
+      <h3>CI/CD Pipeline Setup</h3>
+      <p>From commit to live in minutes. Automated testing, staging, and rollbacks so deployments are boring — in a good way.</p>
+      <div class="svc-tags">
+        <span class="svc-tag">GitLab CI</span>
+        <span class="svc-tag">GitHub Actions</span>
+        <span class="svc-tag">ArgoCD</span>
+      </div>
+      <div class="svc-outcome">Deploy safely in minutes, not hours</div>
+    </div>
+    <div class="svc-card c-sky">
+      <span class="svc-icon">📊</span>
+      <h3>Monitoring &amp; Observability</h3>
+      <p>Stop hearing about outages from customers. Full-stack visibility, smart alerting, and dashboards that tell you what matters.</p>
+      <div class="svc-tags">
+        <span class="svc-tag">Prometheus</span>
+        <span class="svc-tag">Grafana</span>
+        <span class="svc-tag">ELK Stack</span>
+      </div>
+      <div class="svc-outcome">Detect issues before customers do</div>
+    </div>
+    <div class="svc-card c-violet">
+      <span class="svc-icon">☁️</span>
+      <h3>Cloud Migration &amp; Optimisation</h3>
+      <p>Move intelligently or cut costs on what you have. Right-sized architecture, reserved instances, and waste elimination.</p>
+      <div class="svc-tags">
+        <span class="svc-tag">AWS</span>
+        <span class="svc-tag">Azure</span>
+        <span class="svc-tag">Google Cloud</span>
+      </div>
+      <div class="svc-outcome">30–40% typical cost reduction</div>
+    </div>
+    <div class="svc-card c-amber">
+      <span class="svc-icon">🔒</span>
+      <h3>Security &amp; Compliance</h3>
+      <p>Hardened access controls, secret management, audit trails, and disaster recovery. Pass your next audit with confidence.</p>
+      <div class="svc-tags">
+        <span class="svc-tag">ISO 27001</span>
+        <span class="svc-tag">Vault</span>
+        <span class="svc-tag">ITIL</span>
+      </div>
+      <div class="svc-outcome">Audit-ready infrastructure</div>
+    </div>
+    <div class="svc-card c-ink" style="position:relative">
+      <div class="svc-badge">Premium</div>
+      <span class="svc-icon">⚙️</span>
+      <h3 style="color:#fff">Platform Engineering</h3>
+      <p>The end goal: a self-service internal developer platform. Engineers ship fast, ops teams sleep soundly. Golden paths, not gatekeepers.</p>
+      <div class="svc-tags">
+        <span class="svc-tag">Backstage</span>
+        <span class="svc-tag">Kubernetes</span>
+        <span class="svc-tag">GitOps</span>
+      </div>
+      <div class="svc-outcome">Engineering velocity at scale</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTORS -->
+<section id="sectors">
+  <div class="fade">
+    <div class="section-eyebrow">Industries</div>
+    <h2 class="section-title">Partnerships for <strong style="color:var(--coral)">every sector</strong></h2>
+    <p class="section-body">We specialise in Ghanaian industries where infrastructure instability carries the highest cost. Every sector, every size.</p>
+  </div>
+  <div class="sector-tabs fade">
+    <button class="sector-tab active" onclick="showSector(0,this)">Financial Services</button>
+    <button class="sector-tab" onclick="showSector(1,this)">Telecom &amp; ISPs</button>
+    <button class="sector-tab" onclick="showSector(2,this)">Software Houses</button>
+    <button class="sector-tab" onclick="showSector(3,this)">E-commerce</button>
+    <button class="sector-tab" onclick="showSector(4,this)">Government</button>
+  </div>
+  <div class="sector-panels">
+    <div class="sector-panel active">
+      <div class="sector-visual lime"><div class="sector-num">01</div><h3>Financial Services &amp; Fintech</h3></div>
+      <div class="sector-info">
+        <h4>Where downtime means direct revenue loss</h4>
+        <p>Banks, payment platforms, SACCOs, and fintechs operate in zero-tolerance environments. A 10-minute outage during peak hours can mean millions in lost transactions and immediate regulatory scrutiny.</p>
+        <p>We implement high-availability architectures, automated failover, and audit-ready infrastructure that keeps you running — and compliant.</p>
+        <div class="pain-chips">
+          <span class="pain-chip">Unplanned outages</span>
+          <span class="pain-chip">Regulatory compliance</span>
+          <span class="pain-chip">Slow release cycles</span>
+          <span class="pain-chip">Infrastructure instability</span>
+        </div>
+      </div>
+    </div>
+    <div class="sector-panel">
+      <div class="sector-visual coral"><div class="sector-num">02</div><h3>Telecom &amp; ISPs</h3></div>
+      <div class="sector-info">
+        <h4>Network-scale automation and observability</h4>
+        <p>Carriers and ISPs managing thousands of endpoints need automation that scales without proportional headcount growth. Manual configuration is a liability at network scale.</p>
+        <p>We build automation pipelines, observability platforms, and capacity planning tools that keep your network healthy and your ops team focused on what matters.</p>
+        <div class="pain-chips">
+          <span class="pain-chip">Manual configuration</span>
+          <span class="pain-chip">Observability gaps</span>
+          <span class="pain-chip">Capacity planning</span>
+          <span class="pain-chip">Incident response</span>
+        </div>
+      </div>
+    </div>
+    <div class="sector-panel">
+      <div class="sector-visual sky"><div class="sector-num">03</div><h3>Software Houses</h3></div>
+      <div class="sector-info">
+        <h4>Professionalise your delivery pipeline</h4>
+        <p>Many Ghanaian software companies still deploy via SSH and manual scripts. This works until it doesn't — and when it breaks in production on a Friday night, everyone suffers.</p>
+        <p>We modernise your delivery pipeline with CI/CD, containerisation, and standardised environments so your developers spend time coding, not firefighting deployments.</p>
+        <div class="pain-chips">
+          <span class="pain-chip">Manual deployments</span>
+          <span class="pain-chip">Environment drift</span>
+          <span class="pain-chip">No rollback capability</span>
+          <span class="pain-chip">Slow time-to-market</span>
+        </div>
+      </div>
+    </div>
+    <div class="sector-panel">
+      <div class="sector-visual amber"><div class="sector-num">04</div><h3>E-commerce &amp; Logistics</h3></div>
+      <div class="sector-info">
+        <h4>Uptime when it counts most</h4>
+        <p>Peak sales periods, flash sales, seasonal spikes — your platform needs to handle 10× normal load without warning. Static infrastructure can't do that.</p>
+        <p>We build auto-scaling cloud architectures with load testing, cache layers, and monitoring so your platform bends without breaking.</p>
+        <div class="pain-chips">
+          <span class="pain-chip">Traffic spikes</span>
+          <span class="pain-chip">Peak load failure</span>
+          <span class="pain-chip">Cloud cost overruns</span>
+          <span class="pain-chip">Uptime SLAs</span>
+        </div>
+      </div>
+    </div>
+    <div class="sector-panel">
+      <div class="sector-visual violet"><div class="sector-num">05</div><h3>Government &amp; NGOs</h3></div>
+      <div class="sector-info">
+        <h4>Reliable, accountable, auditable</h4>
+        <p>Public sector organisations need infrastructure that's transparent, auditable, and reliable — often with constrained budgets and limited internal technical capacity.</p>
+        <p>We deliver modern infrastructure practices with full documentation, knowledge transfer, and compliance frameworks appropriate for public accountability.</p>
+        <div class="pain-chips">
+          <span class="pain-chip">Poor processes</span>
+          <span class="pain-chip">Audit requirements</span>
+          <span class="pain-chip">Budget constraints</span>
+          <span class="pain-chip">Reliability</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PHASES -->
+<section id="phases">
+  <div class="fade" style="text-align:center;max-width:600px;margin:0 auto 1rem">
+    <div class="section-eyebrow">Our approach</div>
+    <h2 class="section-title">We meet you <strong style="color:var(--violet)">where you are</strong></h2>
+    <p class="section-body" style="margin:0 auto">Most companies don't need Platform Engineering on day one. We guide you through each phase, proving value at every step before moving to the next.</p>
+  </div>
+  <div class="phases-grid fade">
+    <div class="phase-card" style="position:relative">
+      <div class="phase-connector"></div>
+      <div class="phase-num-big">01</div>
+      <h3>Infrastructure Modernisation</h3>
+      <p>Clean up the foundations before building upwards. Fix what's broken, document what exists, and establish baselines.</p>
+      <ul class="phase-items">
+        <li>Server cleanup &amp; hardening</li>
+        <li>Backup &amp; disaster recovery</li>
+        <li>Cloud setup &amp; cost baseline</li>
+        <li>Basic monitoring deployed</li>
+      </ul>
+    </div>
+    <div class="phase-card" style="position:relative">
+      <div class="phase-connector"></div>
+      <div class="phase-num-big">02</div>
+      <h3>DevOps Automation</h3>
+      <p>Make deployments safe, fast, and repeatable. Your team ships confidently without manual intervention or heroics.</p>
+      <ul class="phase-items">
+        <li>CI/CD pipelines configured</li>
+        <li>Environment standardisation</li>
+        <li>Full observability stack</li>
+        <li>Runbooks &amp; incident response</li>
+      </ul>
+    </div>
+    <div class="phase-card">
+      <div class="phase-num-big">03</div>
+      <h3>Platform Engineering</h3>
+      <p>The end state: a self-service platform where developers ship without ops bottlenecks. Scale without scaling headcount.</p>
+      <ul class="phase-items">
+        <li>Internal developer platform</li>
+        <li>Golden path templates</li>
+        <li>Kubernetes orchestration</li>
+        <li>Service mesh &amp; governance</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section id="results">
+  <div class="results-top fade">
+    <div class="section-eyebrow" style="color:rgba(200,242,60,.5);justify-content:center;display:flex">Real stories. Real results.</div>
+    <h2 class="section-title" style="color:#fff">What clients <strong style="color:var(--lime)">achieve with us</strong></h2>
+    <p class="section-body" style="color:rgba(255,255,255,.45);margin:0 auto">Infrastructure improvements that translate directly to business outcomes.</p>
+  </div>
+  <div class="results-grid fade">
+    <div class="result-card">
+      <div class="result-logo">Fintech Client · Accra</div>
+      <div class="result-metric">−89%</div>
+      <h4>Reduction in deployment incidents</h4>
+      <p>Moved from SSH deployments to a full CI/CD pipeline with automated testing. Incidents dropped from 4 per week to near-zero within 6 weeks of engagement.</p>
+    </div>
+    <div class="result-card">
+      <div class="result-logo">E-commerce Platform · Ghana</div>
+      <div class="result-metric">3× faster</div>
+      <h4>Release cadence improvement</h4>
+      <p>Infrastructure automation and containerisation reduced release cycles from 2 weeks to 3 days, enabling the team to respond to market changes faster than competitors.</p>
+    </div>
+    <div class="result-card">
+      <div class="result-logo">Software House · West Africa</div>
+      <div class="result-metric">42% saved</div>
+      <h4>Monthly cloud spend reduction</h4>
+      <p>Cloud cost audit identified $1,800/mo in wasted spend — over-provisioned instances, unattached volumes, and redundant services eliminated in a single sprint.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="pricing-top fade">
+    <div class="section-eyebrow">Pricing</div>
+    <h2 class="section-title">Transparent, <strong style="color:var(--coral)">outcome-based</strong> pricing</h2>
+    <p class="section-body">Built for Ghanaian businesses. No European rate cards. Value-priced to your growth stage and priced in the currency that makes sense for you.</p>
+  </div>
+  <div class="pricing-grid fade">
+    <div class="price-card">
+      <div class="price-head">
+        <div class="price-name">Assessment</div>
+        <div class="price-amt">Free</div>
+        <div class="price-sub">one-time infrastructure audit</div>
+      </div>
+      <div class="price-body">
+        <p class="price-desc">We review your current setup, identify critical risks, and give you a clear prioritised roadmap. No commitment required.</p>
+        <ul class="price-feats">
+          <li>Infrastructure risk assessment</li>
+          <li>Deployment process review</li>
+          <li>Cloud spend analysis</li>
+          <li>Prioritised recommendations report</li>
+          <li>1-hour debrief call</li>
+        </ul>
+        <a href="#contact" class="price-cta-btn">Book assessment →</a>
+      </div>
+    </div>
+    <div class="price-card featured">
+      <div class="price-head">
+        <div class="price-name">Implementation</div>
+        <div class="price-amt">Custom</div>
+        <div class="price-sub">fixed-scope project packages</div>
+      </div>
+      <div class="price-body">
+        <p class="price-desc">Scoped engagements to implement CI/CD, monitoring, cloud migration, or a full modernisation. Fixed deliverables, fixed timeline.</p>
+        <ul class="price-feats">
+          <li>Dedicated engagement lead</li>
+          <li>Fixed timeline &amp; deliverables</li>
+          <li>Knowledge transfer to your team</li>
+          <li>Full documentation &amp; runbooks</li>
+          <li>30-day post-project support</li>
+        </ul>
+        <a href="#contact" class="price-cta-btn">Get a quote →</a>
+      </div>
+    </div>
+    <div class="price-card">
+      <div class="price-head">
+        <div class="price-name">Retainer</div>
+        <div class="price-amt">Monthly</div>
+        <div class="price-sub">ongoing support &amp; operations</div>
+      </div>
+      <div class="price-body">
+        <p class="price-desc">Your infrastructure team on-call. Monitoring, incident response, optimisation, and continuous improvement each month.</p>
+        <ul class="price-feats">
+          <li>Dedicated monthly support hours</li>
+          <li>Incident response &amp; on-call SLA</li>
+          <li>Monthly health report</li>
+          <li>Proactive optimisation reviews</li>
+          <li>Priority response SLA</li>
+        </ul>
+        <a href="#contact" class="price-cta-btn">Discuss retainer →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<div id="cta-band" class="fade">
+  <div class="cta-band-text">
+    <h2>Ready to stop firefighting your infrastructure?</h2>
+    <p>Start with a free assessment. Honest advice, no commitment, no sales pressure.</p>
+  </div>
+  <div class="cta-band-actions">
+    <a href="#contact" class="btn-ink">Book free assessment →</a>
+    <a href="mailto:hello@infracore.com.gh" class="btn-clear">Email us directly</a>
+  </div>
+</div>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-grid">
+    <div class="contact-left fade">
+      <div class="section-eyebrow" style="color:rgba(200,242,60,.5)">Get in touch</div>
+      <h2 class="section-title">Let's talk about <strong style="color:var(--lime)">your infrastructure</strong></h2>
+      <p class="section-body">Tell us what's causing pain outages, slow releases, cloud costs, compliance. We'll respond within 24 hours with honest advice.</p>
+      <div class="contact-details">
+        <div class="cd"><strong>Location</strong>Accra, Ghana — available across West Africa</div>
+        <div class="cd"><strong>Email</strong>hello@infracore.com.gh</div>
+        <div class="cd"><strong>Phone &amp; WhatsApp</strong>+233 243 947 948</div>
+        <div class="cd"><strong>Response time</strong>Within 24 hours, usually same-day</div>
+      </div>
+    </div>
+    <div class="fade">
+      <form class="contact-form" onsubmit="handleSubmit(event)">
+        <div class="cf-row">
+          <div class="cf-field"><label>Your name</label><input type="text" placeholder="Kwame Mensah"></div>
+          <div class="cf-field"><label>Company</label><input type="text" placeholder="TechCorp Ghana Ltd"></div>
+        </div>
+        <div class="cf-row">
+          <div class="cf-field"><label>Email</label><input type="email" placeholder="kwame@company.com"></div>
+          <div class="cf-field"><label>WhatsApp / Phone</label><input type="tel" placeholder="+233 243 947 948"></div>
+        </div>
+        <div class="cf-field">
+          <label>Industry</label>
+          <select>
+            <option value="">Select your industry</option>
+            <option>Financial Services / Fintech</option>
+            <option>Telecom / ISP</option>
+            <option>Software / Technology</option>
+            <option>E-commerce / Logistics</option>
+            <option>Government / NGO</option>
+            <option>Education</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="cf-field">
+          <label>Biggest infrastructure challenge</label>
+          <textarea rows="4" placeholder="Describe what's causing the most pain — outages, slow deployments, cloud costs, anything..."></textarea>
+        </div>
+        <button type="submit" class="cf-submit">Send message →</button>
+        <p class="cf-note">We respond within 24 hours. Free assessment offered to all qualified enquiries.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a href="#" class="foot-logo">Infra<span>core</span></a>
+  <div class="foot-links">
+    <a href="#who">Solutions</a>
+    <a href="#services">Services</a>
+    <a href="#phases">Approach</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <div class="foot-copy">© 2025 Infracore Ltd · Accra, Ghana</div>
+</footer>
+
+<div class="version-bar">Infracore v__VERSION__ · built __BUILD_DATE__ · commit __GIT_SHA__</div>
+
+<script>
+const fades=document.querySelectorAll('.fade');
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')})},{threshold:.1,rootMargin:'0px 0px -30px 0px'});
+fades.forEach((el,i)=>{el.style.transitionDelay=(i*.04)+'s';obs.observe(el)});
+
+function showSector(idx,btn){
+  document.querySelectorAll('.sector-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.sector-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.sector-panel')[idx].classList.add('active');
+}
+
+function handleSubmit(e){
+  e.preventDefault();
+  const btn=e.target.querySelector('.cf-submit');
+  btn.textContent='Message sent ✓';
+  btn.style.background='#1D6B44';
+  btn.style.color='#fff';
+  btn.disabled=true;
+  setTimeout(()=>{btn.textContent='Send message →';btn.style.background='';btn.style.color='';btn.disabled=false},3000);
+}
+</script>
+</body>
+</html>
