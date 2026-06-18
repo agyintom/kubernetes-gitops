@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.1.3 (2026-06-18)
+
+### Bug Fixes
+
+- Update phone placeholder format in index.html
+  ([`e945e2c`](https://github.com/agyintom/kubernetes-gitops/commit/e945e2ca40026657be5728ffdee62f3dda137810))
+
+
 ## v1.1.2 (2026-06-18)
 
 ### Bug Fixes
