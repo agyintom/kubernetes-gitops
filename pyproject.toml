@@ -56,7 +56,7 @@ commit_message = "ci: release {version} [skip ci]"
 
 # Current version — managed automatically by semantic-release.
 # Do not edit this manually; it is updated on every release.
-version = "1.1.0"
+version = "1.1.1"
 
 # -----------------------------------------------------------------------------
 # Commit parser options
