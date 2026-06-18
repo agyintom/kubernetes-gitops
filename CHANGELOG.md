@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.1.2 (2026-06-18)
+
+### Bug Fixes
+
+- Align image repository name to my-nginx everywhere
+  ([`2ceff96`](https://github.com/agyintom/kubernetes-gitops/commit/2ceff96708a07e5a97a8fceeb17c2aaac3bda998))
+
+
 ## v1.1.1 (2026-06-18)
 
 ### Bug Fixes
