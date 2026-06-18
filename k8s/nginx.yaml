@@ -49,7 +49,7 @@ spec:
         # Image is automatically updated by the CI/CD pipeline on each release
         # Format: <registry>/<name>:<semver-tag>
         # Do not edit this line manually — the pipeline manages it
-        image: 192.168.178.115:5000/mynginx:1.0.0
+        image: 192.168.178.115:5000/mynginx:1.1.0
 
         # IfNotPresent — use the locally cached image if available
         # This is required because the containerd CRI layer has a bug with
