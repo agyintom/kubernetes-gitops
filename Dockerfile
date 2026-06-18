@@ -4,7 +4,7 @@
 # Builds a lightweight nginx container serving the Infracore marketing site.
 # A small version bar is injected at build time so the running container
 # can be traced back to an exact release, build time, and git commit —
-# this is what the CI/CD pipeline displays after every deployment.
+# This is what the CI/CD pipeline displays after every deployment.
 #
 # Build args are injected by the pipeline:
 #   docker build \
