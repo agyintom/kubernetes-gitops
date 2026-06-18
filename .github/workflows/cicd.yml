@@ -11,7 +11,7 @@
 # Runner:  self-hosted (runs on k8s-master)
 # =============================================================================
 
-name: infracore K8s CI/CD
+name: Local K8s CI/CD
 
 on:
   push:
@@ -28,9 +28,9 @@ permissions:
 # -----------------------------------------------------------------------------
 env:
   REGISTRY: 192.168.178.115:5000            # Private local Docker registry
-  IMAGE: infracore                           # Image name in the registry
-  DEPLOYMENT: infracore                       # Kubernetes deployment name
-  CONTAINER: infracore                   # Container name inside the deployment
+  IMAGE: my-nginx                          # Image name in the registry
+  DEPLOYMENT: my-nginx                        # Kubernetes deployment name
+  CONTAINER: my-nginx                   # Container name inside the deployment
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # Suppress Node.js 20 deprecation warnings
 
 jobs:
@@ -211,7 +211,7 @@ jobs:
           log_message "Setting image to ${VERSION} in k8s/nginx.yaml..."
 
           # Replace the image line in nginx.yaml with the new semver tag
-          sed -i "s|image: .*infracore.*|image: ${{ env.REGISTRY }}/${{ env.IMAGE }}:${VERSION}|" k8s/nginx.yaml
+          sed -i "s|image: .*my-nginx.*|image: ${{ env.REGISTRY }}/${{ env.IMAGE }}:${VERSION}|" k8s/nginx.yaml
           grep "image:" k8s/nginx.yaml   # Print updated line for verification
 
           # Configure git identity for the commit
