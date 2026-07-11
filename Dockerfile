@@ -1,18 +1,15 @@
 # =============================================================================
 # Dockerfile — Infracore Landing Page
 # -----------------------------------------------------------------------------
-<<<<<<< HEAD
 # Builds a lightweight nginx container serving the Infracore marketing site.
 # A small version bar is injected at build time so the running container
 # can be traced back to an exact release, build time, and git commit —
 # This is what the CI/CD pipeline displays after every deployment.
-=======
 # Builds a lightweight nginx container that serves a single HTML page
 # displaying build metadata: version, build date, and git commit SHA.
 #
 # The image is built by the CI/CD pipeline on every release and pushed to
 # the private local registry at 192.168.200.115:5000.
->>>>>>> 89e0638 (fix: update registry IP from 192.168.178.115 to 192.168.200.115)
 #
 # Build args are injected by the pipeline:
 #   docker build \
