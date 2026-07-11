@@ -28,15 +28,9 @@ permissions:
 # -----------------------------------------------------------------------------
 env:
   REGISTRY: 192.168.200.115:5000            # Private local Docker registry
-<<<<<<< HEAD
-  IMAGE: my-nginx                          # Image name in the registry
-  DEPLOYMENT: my-nginx                        # Kubernetes deployment name
-  CONTAINER: my-nginx                   # Container name inside the deployment
-=======
   IMAGE: mynginx                             # Image name in the registry
   DEPLOYMENT: my-nginx                       # Kubernetes deployment name
   CONTAINER: my-nginx                        # Container name inside the deployment
->>>>>>> 89e0638 (fix: update registry IP from 192.168.178.115 to 192.168.200.115)
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # Suppress Node.js 20 deprecation warnings
 
 jobs:
