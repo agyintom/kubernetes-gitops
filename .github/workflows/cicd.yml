@@ -27,7 +27,7 @@ permissions:
 # Global environment variables shared across all jobs
 # -----------------------------------------------------------------------------
 env:
-  REGISTRY: 192.168.178.115:5000            # Private local Docker registry
+  REGISTRY: 192.168.200.115:5000            # Private local Docker registry
   IMAGE: my-nginx                          # Image name in the registry
   DEPLOYMENT: my-nginx                        # Kubernetes deployment name
   CONTAINER: my-nginx                   # Container name inside the deployment
