@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v1.1.5 (2026-07-11)
+
+### Bug Fixes
+
+- Image name format in CI/CD workflow
+  ([`09cb4c9`](https://github.com/agyintom/kubernetes-gitops/commit/09cb4c995a598ca23a4fd4d361ef5e7b24e5cbc3))
+
+- Update registry IP from 192.168.178.115 to 192.168.200.115
+  ([`05b77d1`](https://github.com/agyintom/kubernetes-gitops/commit/05b77d1d31c6f2fdf4af0e7b471b8d4a0f2b106e))
+
+
 ## v1.1.4 (2026-07-11)
 
 ### Bug Fixes
