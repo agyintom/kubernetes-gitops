@@ -12,7 +12,7 @@
 # The controller used here is nginx-ingress (ingressClassName: nginx).
 #
 # To access the app, add this line to /etc/hosts on your machine:
-#   192.168.178.115 my-nginx.local
+#   192.168.200.115 my-nginx.local
 # Then open: http://my-nginx.local:30619
 #
 # To apply manually:
@@ -59,7 +59,7 @@ spec:
   - host: my-nginx.local
     # Requests must have the Host header set to 'my-nginx.local' to match.
     # This requires an /etc/hosts entry on the client machine pointing
-    # my-nginx.local to the cluster node IP (192.168.178.115).
+    # my-nginx.local to the cluster node IP (192.168.200.115).
     # Without this entry the browser cannot resolve the hostname.
     http:
       paths:

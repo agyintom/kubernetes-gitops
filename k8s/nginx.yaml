@@ -49,7 +49,11 @@ spec:
         # Image is automatically updated by the CI/CD pipeline on each release
         # Format: <registry>/<name>:<semver-tag>
         # Do not edit this line manually — the pipeline manages it
+<<<<<<< HEAD
         image: 192.168.178.115:5000/my-nginx:1.1.3
+=======
+        image: 192.168.200.115:5000/mynginx:1.2.7
+>>>>>>> 89e0638 (fix: update registry IP from 192.168.178.115 to 192.168.200.115)
 
         # IfNotPresent — use the locally cached image if available
         # This is required because the containerd CRI layer has a bug with
@@ -69,7 +73,7 @@ spec:
 # pods are only reachable by their internal IP which changes every restart.
 #
 # This Service is type NodePort, which exposes the app on a port on every
-# node in the cluster (e.g. 192.168.178.115:30xxx).
+# node in the cluster (e.g. 192.168.200.115:30xxx).
 #
 # Note: NodePort is used here for simplicity. For production, prefer
 # ClusterIP + Ingress which gives a cleaner URL and supports SSL.

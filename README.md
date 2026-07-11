@@ -60,7 +60,7 @@ updated automatically on every release.
 
 ### Infrastructure
 - **Kubernetes cluster** — bare metal kubeadm on VirtualBox VMs (1 master + 1 worker)
-- **Private Docker Registry UI** — visual interface for browsing images at `192.168.178.115:8085`
+- **Private Docker Registry UI** — visual interface for browsing images at `192.168.200.115:8085`
 - **Nginx Ingress Controller** — routes external traffic into the cluster
 - **ArgoCD** — GitOps continuous delivery, watches this repo and syncs the cluster
 - **Prometheus + Grafana** — cluster and pod monitoring with custom dashboard
