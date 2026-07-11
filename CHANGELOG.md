@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.1.4 (2026-07-11)
+
+### Bug Fixes
+
+- Change server IP
+  ([`0499a1e`](https://github.com/agyintom/kubernetes-gitops/commit/0499a1ee404913209102f8ad573b50cef216e784))
+
+
 ## v1.1.3 (2026-06-18)
 
 ### Bug Fixes
